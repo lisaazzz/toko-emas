@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  username  String     @unique
+  password  String
+  notas     Nota[]
+  customers Customer[]
+  payments  Payment[]
+  returs    Retur[]
+  timbang   Timbang[]
+}
+
+model Customer {
+  id     String  @id @default(cuid())
+  userId String
+  user   User    @relation(fields: [userId], references: [id])
+  name   String
+  store  String?
+  phone  String?
+  notas  Nota[]
+}
+
+model Nota {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  notaNo        String
+  date          String
+  type          String    // "sale" | "stock_in" | "stock_return"
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  customerName  String?
+  customerStore String?
+  items         String    // JSON
+  totalGross    Float
+  totalNet      Float
+  catatan       String?
+  payments      Payment[]
+  returs        Retur[]
+}
+
+model Payment {
+  id          Int    @id @default(autoincrement())
+  notaId      String
+  nota        Nota   @relation(fields: [notaId], references: [id])
+  userId      String
+  user        User   @relation(fields: [userId], references: [id])
+  date        String
+  cucian      String // JSON [{totalGram, pieces}]
+  perhiasan   String // JSON [{gross, pct, net}]
+  cash_rp     Float?
+  cash_gram   Float?
+  cash_method String?
+  gold_price  Float?
+}
+
+model Retur {
+  id         Int    @id @default(autoincrement())
+  notaId     String
+  nota       Nota   @relation(fields: [notaId], references: [id])
+  userId     String
+  user       User   @relation(fields: [userId], references: [id])
+  date       String
+  note       String?
+  items      String // JSON
+  totalGross Float
+  totalNet   Float
+}
+
+model Timbang {
+  id           Int    @id @default(autoincrement())
+  userId       String
+  user         User   @relation(fields: [userId], references: [id])
+  date         String @unique
+  go           String // JSON {rol, kotak, packing, total}
+  back         String // JSON {rol, kotak, packing, plastikAmbil, plastikBawa, total}
+  selisih      Float
+  selisihFisik Float
+}
