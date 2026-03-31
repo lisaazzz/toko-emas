@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { useApp } from '@/lib/store'
-import { fmtGram, fmtDate, getDebtStatus, sortNotas } from '@/lib/helpers'
+import { fmtGram, fmtDate, getDebtStatus, getNetAfterRetur, sortNotas } from '@/lib/helpers'
 import NotaDetail from './NotaDetail'
 import NotaForm from './NotaForm'
 import type { NotaWithRelations } from '@/lib/types'
@@ -107,7 +107,7 @@ export default function NotaTab() {
                 <p className="text-[11px] text-gray-500">{fmtDate(nota.date)}</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="font-cormorant text-base font-bold text-amber-700">{fmtGram(nota.totalNet)}</p>
+                <p className="font-cormorant text-base font-bold text-amber-700">{fmtGram(getNetAfterRetur(nota.returs || [], nota.totalGross, nota.totalNet).net)}</p>
                 <p className="text-[10px] text-gray-500">B.Bersih</p>
               </div>
             </button>

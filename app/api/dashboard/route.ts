@@ -28,7 +28,6 @@ export async function GET(req: NextRequest) {
   let totalJualNet = 0
   let notasWithRetur = 0
   let totalPiutang = 0
-  let jualHariIniGross = 0
 
   for (const n of sales) {
     const notaReturs = returs.filter((r) => r.notaId === n.id).map((r) => ({
@@ -48,9 +47,16 @@ export async function GET(req: NextRequest) {
 
     const debt = getDebtStatus(n, notaPayments, notaReturs)
     if (debt.status !== 'lunas') totalPiutang += debt.effectiveRemaining
-
-    if (n.date === today) jualHariIniGross += after.gross
   }
+
+  // Berat kotor jual hari ini = gross nota jual hari ini - gross retur customer hari ini
+  const todaySaleGross = sales
+    .filter((n) => n.date === today)
+    .reduce((s, n) => s + n.totalGross, 0)
+  const todayReturGross = returs
+    .filter((r) => r.date === today)
+    .reduce((s, r) => s + r.totalGross, 0)
+  const jualHariIniGross = Math.max(0, todaySaleGross - todayReturGross)
 
   // Sisa stok = stockIn - jualNet - stockReturnNet
   const sisaGross = totalMasukGross - totalJualGross - totalReturKantorGross
